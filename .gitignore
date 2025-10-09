@@ -1,0 +1,7 @@
+# nunca subas datos reales del mail
+*.env
+.env*
+acme.json
+data/
+poste_data/
+secrets/

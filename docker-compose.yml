@@ -1,0 +1,34 @@
+services:
+  poste:
+    image: analogic/poste.io:latest
+    container_name: poste
+    restart: unless-stopped
+    environment:
+      - HTTPS=OFF     # TLS lo hace Traefik
+    ports:            # Puertos de correo DIRECTOS
+      - "25:25"
+      - "465:465"
+      - "587:587"
+      - "110:110"
+      - "995:995"
+      - "143:143"
+      - "993:993"
+      - "4190:4190"
+    volumes:
+      - poste_data:/data  # <-- volumen, NO commitear su contenido
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mail-ui-http.entrypoints=web
+      - traefik.http.routers.mail-ui-http.rule=Host(`mail.holancloud.com`)
+      - traefik.http.routers.mail-ui-http.middlewares=redirect-to-https@file
+      - traefik.http.routers.mail-ui-https.entrypoints=websecure
+      - traefik.http.routers.mail-ui-https.rule=Host(`mail.holancloud.com`)
+      - traefik.http.routers.mail-ui-https.tls.certresolver=letsencrypt
+      - traefik.http.services.mail-ui.loadbalancer.server.port=80
+volumes:
+  poste_data:
+networks:
+  traefik_proxy:
+    external: true
